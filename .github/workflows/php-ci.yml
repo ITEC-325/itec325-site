@@ -1,0 +1,45 @@
+name: Simple PHP Website CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out the repository
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # 2. Install PHP
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      # 3. Verify required backend files exist
+      - name: Verify PHP files exist
+        run: |
+          set -euo pipefail
+          test -f index.php
+          test -f process_form.php
+          echo "PHP files found"
+
+      # 4. Lint (syntax check) all PHP files
+      - name: PHP Lint Check
+        run: |
+          set -euo pipefail
+          echo "Running syntax checks..."
+          php -l index.php
+          php -l process_form.php
+          echo "All PHP files passed syntax checks"
+
+      # 5. Run a simple functional test
+      - name: Execute PHP script
+        run: |
+          set -euo pipefail
+          echo "Running backend script..."
+          php index.php > output.txt
+          test -f output.txt
+          echo "PHP executed successfully"
