@@ -1,0 +1,48 @@
+name: Car CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-car:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Build the car
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          cd build
+          touch car.txt
+          echo "chassis" >> car.txt
+          echo "engine" >> car.txt
+          echo "wheels" >> car.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: car
+          path: build/car.txt
+
+  test-the-car:
+    runs-on: ubuntu-latest
+    needs: build-car
+
+    steps:
+      - name: Download car artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: car
+
+      - name: Verify car parts
+        run: |
+          set -euo pipefail
+          test -f car.txt
+          echo "Checking that car.txt contains all parts..."
+          grep -q "chassis" car.txt
+          grep -q "engine" car.txt
+          grep -q "wheels" car.txt
+          echo "All parts are present"
